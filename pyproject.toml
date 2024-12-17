@@ -22,6 +22,7 @@ hdrhistogram = "^0.10.3"
 tenacity = "^9.0.0"
 rich = "^13.8.1"
 filelock = "^3.16.0"
+upstash-vector = "^0.6.0"
 
 [tool.poetry.scripts]
 vsb = "vsb.main:main"
