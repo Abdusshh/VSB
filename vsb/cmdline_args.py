@@ -286,6 +286,21 @@ def add_vsb_cmdline_args(
         help="JSON spec of Pinecone index to create (if it does not exist). Default is %(default)s.",
     )
 
+    upstash_group = parser.add_argument_group("Options specific to upstash database")
+    upstash_group.add_argument(
+        "--upstash_vector_rest_url",
+        type=str,
+        help="URL to connect to Upstash index",
+        env_var="VSB__UPSTASH_VECTOR_REST_URL",
+    )
+
+    upstash_group.add_argument(
+        "--upstash_vector_rest_token",
+        type=str,
+        help="Token to connect to Upstash index",
+        env_var="VSB__UPSTASH_VECTOR_REST_TOKEN",
+    )
+
     pgvector_group = parser.add_argument_group("Options specific to pgvector database")
     pgvector_group.add_argument(
         "--pgvector_host",
