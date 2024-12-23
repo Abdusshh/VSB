@@ -4,7 +4,7 @@ from locust.exception import StopUser
 
 import vsb
 from vsb import logger
-from upstash_vector import AsyncIndex, Index, Vector
+from upstash_vector import Index
 from tenacity import retry, stop_after_attempt, wait_exponential_jitter, after_log
 import grpc.experimental.gevent as grpc_gevent
 import time
