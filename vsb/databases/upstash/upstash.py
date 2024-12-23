@@ -185,9 +185,10 @@ class UpstashDB(DB):
         ) as finalize_id:
             while True:
                 index_count = self.index.info().vector_count
+                pending_vector_count = self.index.info().pending_vector_count
                 if vsb.progress:
                     vsb.progress.update(finalize_id, completed=index_count)
-                if index_count >= record_count:
+                if pending_vector_count == 0: # All vectors are processed
                     logger.debug(
                         f"UpstashDB: Index vector count reached {index_count}, "
                         f"finalize is complete"
