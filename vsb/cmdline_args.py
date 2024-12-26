@@ -301,6 +301,14 @@ def add_vsb_cmdline_args(
         env_var="VSB__UPSTASH_VECTOR_REST_TOKEN",
     )
 
+    supabase_group = parser.add_argument_group("Options specific to supabase database")
+    supabase_group.add_argument(
+        "--supabase_connection_string",
+        type=str,
+        help="Connection string to connect to Supabase index",
+        env_var="VSB__SUPABASE_CONNECTION_STRING",
+    )
+
     pgvector_group = parser.add_argument_group("Options specific to pgvector database")
     pgvector_group.add_argument(
         "--pgvector_host",
