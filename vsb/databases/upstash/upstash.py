@@ -65,15 +65,25 @@ class UpstashNamespace(Namespace):
         return matches
 
     def fetch_batch(self, request: list[str]) -> list[Record]:
-        return self.index.fetch(
-            ids=request, 
+        # Upstash FetchResult has id, vector (List[float]), metadata (Dict)
+        # VSB Record needs id: str, values: Vector, metadata: dict
+        result = self.index.fetch(
+            ids=request,
             include_vectors=True,
             include_metadata=True,
             namespace=self.namespace
-            )
+        )
+
+        return [
+            Record(
+                id=record.id,
+                values=record.vector,  # Upstash uses 'vector' instead of 'values'
+                metadata=record.metadata if record.metadata else None
+            ) for record in result
+        ]
 
     def delete_batch(self, request: list[str]):
-        self.index.delete(request)
+        self.index.delete(ids=request, namespace=self.namespace)
 
 
 class UpstashDB(DB):
