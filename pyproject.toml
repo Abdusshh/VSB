@@ -23,6 +23,7 @@ tenacity = "^9.0.0"
 rich = "^13.8.1"
 filelock = "^3.16.0"
 upstash-vector = "^0.6.0"
+vecs = "^0.4.5"
 
 [tool.poetry.scripts]
 vsb = "vsb.main:main"
