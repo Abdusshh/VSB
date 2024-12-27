@@ -118,7 +118,7 @@ class SupabaseDB(DB):
 
     def get_batch_size(self, sample_record: Record) -> int:
         # Copied from the PgvectorDB implementation
-        return 1000
+        return 500 # vecs split records into chunks of this size
 
     def get_namespace(self, namespace: str) -> Namespace:
         return SupabaseNamespace(self.index, self.name, self.measure)
