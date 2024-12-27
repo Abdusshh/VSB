@@ -114,7 +114,7 @@ class SupabaseDB(DB):
             case DistanceMetric.Euclidean:
                 return IndexMeasure.l2_distance
             case DistanceMetric.DotProduct:
-                raise ValueError("SupabaseDB: DotProduct metric is not supported")
+                return IndexMeasure.max_inner_product # this is the dot product
 
     def get_batch_size(self, sample_record: Record) -> int:
         # Copied from the PgvectorDB implementation

@@ -26,13 +26,15 @@ vsb --database=supabase --workload=mnist-test \
 
 ## Supported Features
 
-- Similarity metrics: Cosine similarity and Euclidean distance (L2)
+- Similarity metrics:
+  - Cosine similarity
+  - Euclidean distance (L2)
+  - Dot product (Maximum inner product)
 - Automatic index creation and optimization
 - Batch operations for insert, update, search, and delete
 - Metadata filtering
 
 ## Notes
 
-- The DotProduct similarity metric is not supported
 - Collections can be queried immediately after creation, but for optimal performance, indexing is performed after the population phase is complete
 - The default batch size is 1000 records
