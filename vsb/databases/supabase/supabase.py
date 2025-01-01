@@ -105,6 +105,8 @@ class SupabaseDB(DB):
 
         measure = SupabaseDB._get_distance_func(metric)
         self.measure = measure
+        # index the collection for fast search performance
+        self.index.create_index(measure = measure)
 
     @staticmethod
     def _get_distance_func(metric: DistanceMetric) -> IndexMeasure:
@@ -114,7 +116,7 @@ class SupabaseDB(DB):
             case DistanceMetric.Euclidean:
                 return IndexMeasure.l2_distance
             case DistanceMetric.DotProduct:
-                return IndexMeasure.max_inner_product # this is the dot product
+                return IndexMeasure.max_inner_product 
 
     def get_batch_size(self, sample_record: Record) -> int:
         # Copied from the PgvectorDB implementation
@@ -144,11 +146,12 @@ class SupabaseDB(DB):
             )
             logger.info(f"SupabaseDB: Index namespace: {self.name}")
             self.index._drop() # delete the collection
-            # re-create the collection
+            # re-create the collection and index
             self.index = self.vx.get_or_create_collection(
                 name=self.name, 
                 dimension=self.dimensions
                 )
+            self.index.create_index(measure = self.measure)
         except Exception as e:
             # Serverless indexes can throw a "Namespace not found" exception for
             # delete_all if there are no documents in the index. Simply ignore,
@@ -173,9 +176,6 @@ class SupabaseDB(DB):
                     )
                     break
                 time.sleep(1)
-
-        # index the collection for fast search performance
-        self.index.create_index(measure = self.measure)
 
     def skip_refinalize(self):
         return False
