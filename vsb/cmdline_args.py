@@ -308,6 +308,20 @@ def add_vsb_cmdline_args(
         help="Connection string to connect to Supabase index",
         env_var="VSB__SUPABASE_CONNECTION_STRING",
     )
+    supabase_group.add_argument(
+        "--supabase_index_type",
+        type=str,
+        choices=["ivfflat", "hnsw"],
+        default="hnsw",
+        help="Index type to use for Supabase. Default is %(default)s.",
+    )
+    supabase_group.add_argument(
+        "--supabase_create_index",
+        type=str,
+        choices=["before", "after"],
+        default="after",
+        help="Create Supabase index before or after the populate phase (affects populate speed). Default is %(default)s.",
+    )
 
     pgvector_group = parser.add_argument_group("Options specific to pgvector database")
     pgvector_group.add_argument(
