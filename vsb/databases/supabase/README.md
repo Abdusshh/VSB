@@ -17,7 +17,10 @@ To run VSB against a Supabase database:
 
 ```shell
 vsb --database=supabase --workload=mnist-test \
-    --supabase_connection_string="postgresql://postgres:[YOUR-PASSWORD]@[HOST]:[PORT]/postgres"
+    --supabase_connection_string="postgresql://postgres:[YOUR-PASSWORD]@[HOST]:[PORT]/postgres" \
+    --overwrite \
+    --supabase_index_type=hnsw \
+    --supabase_create_index=after
 ```
 
 > [!TIP]
@@ -29,7 +32,9 @@ vsb --database=supabase --workload=mnist-test \
 - Similarity metrics:
   - Cosine similarity
   - Euclidean distance (L2)
-  - Dot product (Maximum inner product)
+- Index types:
+  - HNSW
+  - IVFFlat
 - Automatic index creation and optimization
 - Batch operations for insert, update, search, and delete
 - Metadata filtering
@@ -37,4 +42,6 @@ vsb --database=supabase --workload=mnist-test \
 ## Notes
 
 - Collections can be queried immediately after creation, but for optimal performance, indexing is performed after the population phase is complete
-- The default batch size is 1000 records
+- The default batch size is 500 records
+- Dot product is not supported in vecs module
+- You can create an index either before or after the population phase. If you create it after the population phase, the index will be created after the final batch of records has been ingested and this operation might take a while to complete and may fail if the index is too large. In this case, consider creating the index before the population phase.
