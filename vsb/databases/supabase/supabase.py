@@ -5,7 +5,7 @@ from locust.exception import StopUser
 import vsb
 from vsb import logger
 import vecs
-from vecs import IndexMeasure, Collection
+from vecs import IndexMeasure, Collection, IndexMethod
 from tenacity import retry, stop_after_attempt, wait_exponential_jitter, after_log
 import grpc.experimental.gevent as grpc_gevent
 import time
@@ -82,6 +82,7 @@ class SupabaseDB(DB):
     ) -> None:
         self.skip_populate = config["skip_populate"]
         self.overwrite = config["overwrite"]
+
         # We will use the name of the workload as the namespace for the index
         self.name = f"vsb-{name}"
         self.dimensions = dimensions
@@ -105,18 +106,51 @@ class SupabaseDB(DB):
 
         measure = SupabaseDB._get_distance_func(metric)
         self.measure = measure
+            
+        # default index type to hnsw
+        self.index_type = config["supabase_index_type"]
+        self.method = self._get_index_method(self.index_type)
+        logger.info(f"SupabaseDB: Using {self.index_type} index")
+
+        self.index_creation = config["supabase_create_index"]
+        if self.index_creation == "after":
+            self.skip_index_creation_before_populate = True
+        else:
+            self.skip_index_creation_before_populate = False
+
         # index the collection for fast search performance
-        self.index.create_index(measure = measure)
+        if self.skip_index_creation_before_populate:
+            logger.info("SupabaseDB: Skipping index creation before population")
+            return
+        
+        logger.info("SupabaseDB: Index creation starting before population")
+        self.index.create_index(measure = self.measure, method = self.method)
 
     @staticmethod
     def _get_distance_func(metric: DistanceMetric) -> IndexMeasure:
         match metric:
             case DistanceMetric.Cosine:
+                logger.info("SupabaseDB: Using cosine distance")
                 return IndexMeasure.cosine_distance
             case DistanceMetric.Euclidean:
+                logger.info("SupabaseDB: Using euclidean distance")
                 return IndexMeasure.l2_distance
             case DistanceMetric.DotProduct:
-                return IndexMeasure.max_inner_product 
+                logger.warning(
+                    "SupabaseDB: DotProduct metric not supported by vecs, "
+                    " - using cosine distance instead"
+                    )
+                return IndexMeasure.cosine_distance
+
+    @staticmethod
+    def _get_index_method(index_type: str) -> IndexMethod:
+        """Convert index type string to IndexMethod enum."""
+        if index_type == "ivfflat":
+            return IndexMethod.ivfflat
+        elif index_type == "hnsw":
+            return IndexMethod.hnsw
+        else:
+            raise ValueError(f"Unknown index type: {index_type}")
 
     def get_batch_size(self, sample_record: Record) -> int:
         # Copied from the PgvectorDB implementation
@@ -133,7 +167,7 @@ class SupabaseDB(DB):
             return
         if not self.overwrite:
             msg = (
-                "SupabaseDB: Index already exists - cowardly refusing"
+                "SupabaseDB: Can't know if index already exists - cowardly refusing"
                 " to overwrite existing data. Specify --overwrite to delete"
                 " it, or specify --skip-populate to skip population phase."
             )
@@ -151,7 +185,10 @@ class SupabaseDB(DB):
                 name=self.name, 
                 dimension=self.dimensions
                 )
-            self.index.create_index(measure = self.measure)
+            if self.skip_index_creation_before_populate:
+                logger.info("SupabaseDB: Skipping index creation before population")
+                return
+            self.index.create_index(measure = self.measure, method = self.method)
         except Exception as e:
             # Serverless indexes can throw a "Namespace not found" exception for
             # delete_all if there are no documents in the index. Simply ignore,
@@ -166,7 +203,7 @@ class SupabaseDB(DB):
             "  Finalize population", "  ✔ Finalize population", total=record_count
         ) as finalize_id:
             while True:
-                index_count = self.index.__len__() # returns number of vectors in the collection
+                index_count = self.index.__len__() # returns number of vectors in the index
                 if vsb.progress:
                     vsb.progress.update(finalize_id, completed=index_count)
                 if index_count >= record_count:
@@ -176,6 +213,9 @@ class SupabaseDB(DB):
                     )
                     break
                 time.sleep(1)
+        if self.skip_index_creation_before_populate:
+            logger.info("SupabaseDB: Index creation starting after population")
+            self.index.create_index(measure = self.measure, method = self.method)
 
     def skip_refinalize(self):
         return False
