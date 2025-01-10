@@ -136,11 +136,8 @@ class SupabaseDB(DB):
                 logger.info("SupabaseDB: Using euclidean distance")
                 return IndexMeasure.l2_distance
             case DistanceMetric.DotProduct:
-                logger.warning(
-                    "SupabaseDB: DotProduct metric not supported by vecs, "
-                    " - using cosine distance instead"
-                    )
-                return IndexMeasure.cosine_distance
+                logger.info("SupabaseDB: Using dot product distance")
+                return IndexMeasure.max_inner_product
 
     @staticmethod
     def _get_index_method(index_type: str) -> IndexMethod:
