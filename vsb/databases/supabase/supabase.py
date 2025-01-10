@@ -118,6 +118,10 @@ class SupabaseDB(DB):
         else:
             self.skip_index_creation_before_populate = False
 
+        if self.skip_populate:
+            logger.info("SupabaseDB: Skipping population")
+            return
+
         # index the collection for fast search performance
         if self.skip_index_creation_before_populate:
             logger.info("SupabaseDB: Skipping index creation before population")
