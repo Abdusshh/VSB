@@ -52,7 +52,12 @@ class SupabaseNamespace(Namespace):
             )
 
         result = do_query_with_retry()
+        logger.debug(f"SupabaseDB: Search request top_k: {request.top_k}")
+        logger.debug(f"SupabaseDB: Search request filter: {request.filter}")
+        logger.debug(f"SupabaseDB: Search result: {result}")
+        logger.debug(f"SupabaseDB: Search result length: {len(result)}")
         matches = [id for id in result]  # List of ids
+        logger.debug(f"SupabaseDB: Search result ids: {matches}")
         return matches
 
     def fetch_batch(self, request: list[str]) -> list[Record]:
