@@ -48,7 +48,8 @@ class SupabaseNamespace(Namespace):
                 data=request.values,
                 limit=request.top_k,
                 filters=request.filter,
-                measure=self.index_measure
+                measure=self.index_measure,
+                ef_search=2 * request.top_k # similar to default vsb implementation
             )
 
         result = do_query_with_retry()
@@ -56,8 +57,7 @@ class SupabaseNamespace(Namespace):
         logger.debug(f"SupabaseDB: Search request filter: {request.filter}")
         logger.debug(f"SupabaseDB: Search result: {result}")
         logger.debug(f"SupabaseDB: Search result length: {len(result)}")
-        matches = [id for id in result]  # List of ids
-        logger.debug(f"SupabaseDB: Search result ids: {matches}")
+        matches = result  # result is a list of ids
         return matches
 
     def fetch_batch(self, request: list[str]) -> list[Record]:
