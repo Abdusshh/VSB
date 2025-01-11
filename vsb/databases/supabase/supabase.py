@@ -49,14 +49,10 @@ class SupabaseNamespace(Namespace):
                 limit=request.top_k,
                 filters=request.filter,
                 measure=self.index_measure,
-                ef_search=2 * request.top_k # similar to default vsb implementation
+                ef_search=2 * request.top_k # similar to default vsb pgvectorimplementation
             )
 
         result = do_query_with_retry()
-        logger.debug(f"SupabaseDB: Search request top_k: {request.top_k}")
-        logger.debug(f"SupabaseDB: Search request filter: {request.filter}")
-        logger.debug(f"SupabaseDB: Search result: {result}")
-        logger.debug(f"SupabaseDB: Search result length: {len(result)}")
         matches = result  # result is a list of ids
         return matches
 
