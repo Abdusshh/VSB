@@ -286,6 +286,43 @@ def add_vsb_cmdline_args(
         help="JSON spec of Pinecone index to create (if it does not exist). Default is %(default)s.",
     )
 
+    upstash_group = parser.add_argument_group("Options specific to upstash database")
+    upstash_group.add_argument(
+        "--upstash_vector_rest_url",
+        type=str,
+        help="URL to connect to Upstash index",
+        env_var="VSB__UPSTASH_VECTOR_REST_URL",
+    )
+
+    upstash_group.add_argument(
+        "--upstash_vector_rest_token",
+        type=str,
+        help="Token to connect to Upstash index",
+        env_var="VSB__UPSTASH_VECTOR_REST_TOKEN",
+    )
+
+    supabase_group = parser.add_argument_group("Options specific to supabase database")
+    supabase_group.add_argument(
+        "--supabase_connection_string",
+        type=str,
+        help="Connection string to connect to Supabase index",
+        env_var="VSB__SUPABASE_CONNECTION_STRING",
+    )
+    supabase_group.add_argument(
+        "--supabase_index_type",
+        type=str,
+        choices=["ivfflat", "hnsw"],
+        default="hnsw",
+        help="Index type to use for Supabase. Default is %(default)s.",
+    )
+    supabase_group.add_argument(
+        "--supabase_create_index",
+        type=str,
+        choices=["before", "after"],
+        default="after",
+        help="Create Supabase index before or after the populate phase (affects populate speed). Default is %(default)s.",
+    )
+
     pgvector_group = parser.add_argument_group("Options specific to pgvector database")
     pgvector_group.add_argument(
         "--pgvector_host",
